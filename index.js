@@ -33,6 +33,49 @@ function onLaunchRequest(event, context) {
     );
 }
 
+function onIntentRequest(event, context) {
+  console.log("In function onIntentRequest");
+
+  const intent = event.request.intent;
+
+  if(intent.name === 'GetIndex') {
+    console.log("Calling the GET INDEX intent");
+    getIndex(intent, context);
+  } else {
+    context.fail("Could not identify indent: " + intent.name);
+  }
+}
+
+function getIndex(intent, context) {
+  var endpoint = "https://www.alphavantage.co/query?" +
+  "function=TIME_SERIES_DAILY&symbol=DJI&outputsize=1&apikey=S3L99HG47ZDQQWI5";
+
+  var body = "";
+
+  https.get(endpoint, (response) => {
+      response.on('data', (chunk) => {
+        console.log("Received data response");
+        body += chunk
+      });
+
+      response.on('end', () => {
+        var jsonData = JSON.parse(body);
+        var timeSeriesData = jsonData["Time Series (Daily)"];
+
+        var currentValue = "";
+        for (key in timeSeriesData) {
+          var dayData = timeSeriesData[key];
+          currentValue = dayData["4. close"];
+          break;
+        }
+
+        console.log("Current stock value is: " + currentValue);
+        speechOutput = `DJIA is ${currentValue}. Thank you for using Market Tracker. Good bye.`;
+        context.succeed(generateResponse(buildSpeechletResponse(speechOutput, false), {}));
+      });
+  });
+}
+
 buildSpeechletResponse = (outputText, shouldEndSession) => {
   return {
     outputSpeech: {

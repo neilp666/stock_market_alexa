@@ -41,6 +41,12 @@ function onIntentRequest(event, context) {
   if(intent.name === 'GetIndex') {
     console.log("Calling the GET INDEX intent");
     getIndex(intent, context);
+  } else if (intent.name === 'AMAZON.HelpIntent') {
+    console.log("AMAZON.HelpIntent");
+    onLaunchRequest(event, context);
+  } else if (intent.name === 'AMAZON.StopIntent') {
+    console.log("AMAZON.StopIntent");
+    onSessionEndSession(event, context);
   } else {
     context.fail("Could not identify indent: " + intent.name);
   }
@@ -48,7 +54,7 @@ function onIntentRequest(event, context) {
 
 function getIndex(intent, context) {
   var endpoint = "https://www.alphavantage.co/query?" +
-  "function=TIME_SERIES_DAILY&symbol=DJI&outputsize=1&apikey=S3L99HG47ZDQQWI5";
+  "function=TIME_SERIES_DAILY&symbol=DJI&outputsize=1&apikey=";
 
   var body = "";
 
@@ -74,6 +80,12 @@ function getIndex(intent, context) {
         context.succeed(generateResponse(buildSpeechletResponse(speechOutput, false), {}));
       });
   });
+}
+
+function shouldEndSession() {
+  console.log("In function shouldEndSession");
+  speechOutput = "Thank you for trying the Stock Market Tracker. Have a nice day!";
+  context.succeed(generateResponse(buildSpeechletResponse(speechOutput, true), {}))
 }
 
 buildSpeechletResponse = (outputText, shouldEndSession) => {
